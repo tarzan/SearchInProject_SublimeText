@@ -43,6 +43,8 @@ class SearchInProjectCommand(sublime_plugin.WindowCommand):
     def run(self, type="search"):
         if type == "search":
             self.search()
+        elif type == "find_module":
+            self.module_search()
         elif type == "clear":
             self.clear_markup()
         elif type == "next":
@@ -60,6 +62,15 @@ class SearchInProjectCommand(sublime_plugin.WindowCommand):
         __import__("searchengines.%s" % self.engine_name)
         self.engine = searchengines.__dict__[self.engine_name].engine_class(self.settings)
         os.chdir(pushd)
+
+    def module_search(self):
+        self.load_search_engine()
+        view = self.window.active_view()
+        selection_text = "defmodule.+" + view.substr(view.sel()[0])
+        if not "\n" in selection_text and selection_text:
+            self.perform_search(selection_text)
+        else:
+            self.search()
 
     def search(self):
         self.load_search_engine()
